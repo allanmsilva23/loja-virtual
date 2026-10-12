@@ -1,60 +1,44 @@
-import { SymbolView } from 'expo-symbols';
-import { Link, Tabs } from 'expo-router';
-import { Platform, Pressable } from 'react-native';
-
-import { CartProvider } from '../../CartContext'; 
-
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
-import { useClientOnlyValue } from '@/components/useClientOnlyValue';
+import React from 'react';
+import { Tabs } from 'expo-router';
+import { Text } from 'react-native';
+import { useCart } from '../../CartContext';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const { totalItens } = useCart();
 
   return (
-    <CartProvider>
-      <Tabs
-        screenOptions={{
-          tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-          // Disable the static render of the header on web
-          // to prevent a hydration error in React Navigation v6.
-          headerShown: useClientOnlyValue(false, true),
-        }}>
-        <Tabs.Screen
-          name="index"
-          options={{
-            title: 'Catálogo',
-            tabBarIcon: ({ color }) => (
-              <SymbolView
-                name={{
-                  ios: 'chevron.left.forwardslash.chevron.right',
-                  android: 'code',
-                  web: 'code',
-                }}
-                tintColor={color}
-                size={28}
-              />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="carrinho"
-          options={{
-            title: 'Carrinho',
-            tabBarIcon: ({ color }) => (
-              <SymbolView
-                name={{
-                  ios: 'chevron.left.forwardslash.chevron.right',
-                  android: 'code',
-                  web: 'code',
-                }}
-                tintColor={color}
-                size={28}
-              />
-            ),
-          }}
-        />
-      </Tabs>
-    </CartProvider>
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: '#222222',
+        tabBarInactiveTintColor: '#777777',
+        tabBarLabelStyle: { fontSize: 11 },
+      }}
+    >
+      <Tabs.Screen
+        name="index"
+        options={{ title: 'Catálogo', tabBarIcon: () => <Text>🛍️</Text> }}
+      />
+      <Tabs.Screen
+        name="carrinho"
+        options={{
+          title: 'Carrinho',
+          tabBarBadge: totalItens > 0 ? totalItens : undefined,
+          tabBarIcon: () => <Text>🛒</Text>,
+        }}
+      />
+      <Tabs.Screen
+        name="pedidos"
+        options={{ title: 'Pedidos', tabBarIcon: () => <Text>📦</Text> }}
+      />
+      <Tabs.Screen
+        name="perfil"
+        options={{ title: 'Minha conta', tabBarIcon: () => <Text>👤</Text> }}
+      />
+      <Tabs.Screen
+        name="gestao"
+        options={{ href: null, title: 'Gestão' }}
+      />
+    </Tabs>
   );
 }
