@@ -161,22 +161,22 @@ export default function PerfilScreen() {
   };
 
   if (loadingAuth) {
-    return <ActivityIndicator size="large" style={styles.centro} />;
+    return <ActivityIndicator size="large" style={styles.centro} color="#6D28D9" />;
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+    <ScrollView style={styles.pagina} contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
       <Text style={styles.titulo}>{user ? 'Minha Conta' : cadastro ? 'Criar Conta' : 'Entrar'}</Text>
       {user ? (
         <View>
           <Text style={styles.rotulo}>Nome</Text>
-          <TextInput style={styles.input} value={nome} onChangeText={setNome} placeholder="Nome completo" />
+          <TextInput style={styles.input} value={nome} onChangeText={setNome} placeholder="Nome completo" placeholderTextColor="#969AAF" />
           <Text style={styles.rotulo}>E-mail</Text>
           <TextInput style={[styles.input, styles.bloqueado]} value={user.email || email} editable={false} />
           <Text style={styles.rotulo}>Telefone</Text>
-          <TextInput style={styles.input} value={telefone} onChangeText={setTelefone} keyboardType="phone-pad" placeholder="Telefone" />
+          <TextInput style={styles.input} value={telefone} onChangeText={setTelefone} keyboardType="phone-pad" placeholder="Telefone" placeholderTextColor="#969AAF" />
           <TouchableOpacity style={styles.botao} onPress={salvarPerfil} disabled={carregando || !cliente}>
-            {carregando ? <ActivityIndicator color="#fff" /> : <Text style={styles.textoBotao}>Salvar dados</Text>}
+            {carregando ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.textoBotao}>Salvar dados</Text>}
           </TouchableOpacity>
           {admin && (
             <TouchableOpacity style={styles.botaoSecundario} onPress={() => router.push('/(tabs)/gestao')}>
@@ -192,7 +192,7 @@ export default function PerfilScreen() {
           {cadastro && (
             <>
               <Text style={styles.rotulo}>Nome completo</Text>
-              <TextInput style={styles.input} value={nome} onChangeText={setNome} placeholder="Seu nome" />
+              <TextInput style={styles.input} value={nome} onChangeText={setNome} placeholder="Seu nome" placeholderTextColor="#969AAF" />
             </>
           )}
           <Text style={styles.rotulo}>E-mail</Text>
@@ -203,6 +203,7 @@ export default function PerfilScreen() {
             value={email}
             onChangeText={setEmail}
             placeholder="seu@email.com"
+            placeholderTextColor="#969AAF"
           />
           <Text style={styles.rotulo}>Senha</Text>
           <TextInput
@@ -211,16 +212,17 @@ export default function PerfilScreen() {
             value={senha}
             onChangeText={setSenha}
             placeholder="Sua senha"
+            placeholderTextColor="#969AAF"
           />
           <TouchableOpacity style={styles.botao} disabled={carregando} onPress={autenticar}>
             {carregando ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color="#FFFFFF" />
             ) : (
               <Text style={styles.textoBotao}>{cadastro ? 'Cadastrar' : 'Entrar'}</Text>
             )}
           </TouchableOpacity>
           <TouchableOpacity style={styles.alternar} onPress={() => setCadastro(!cadastro)}>
-            <Text>{cadastro ? 'Já tenho conta' : 'Ainda não tenho conta'}</Text>
+            <Text style={styles.alternarTexto}>{cadastro ? 'Já tenho conta' : 'Ainda não tenho conta'}</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -229,16 +231,107 @@ export default function PerfilScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 22, paddingBottom: 60, backgroundColor: '#fff', flexGrow: 1 },
-  centro: { flex: 1 },
-  titulo: { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 22 },
-  rotulo: { fontWeight: 'bold', marginBottom: 6 },
-  input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 7, padding: 12, marginBottom: 16 },
-  bloqueado: { backgroundColor: '#eee', color: '#555' },
-  botao: { backgroundColor: '#222', alignItems: 'center', padding: 15, borderRadius: 7, marginTop: 8 },
-  botaoSecundario: { backgroundColor: '#555', alignItems: 'center', padding: 15, borderRadius: 7, marginTop: 15 },
-  textoBotao: { color: '#fff', fontWeight: 'bold' },
-  alternar: { alignItems: 'center', marginTop: 20 },
-  sair: { alignItems: 'center', marginTop: 25 },
-  textoSair: { color: '#b00020', fontWeight: 'bold' },
+  pagina: {
+    flex: 1,
+    backgroundColor: '#F6F7FB',
+  },
+  container: {
+    flexGrow: 1,
+    width: '100%',
+    maxWidth: 600,
+    alignSelf: 'center',
+    paddingHorizontal: 28,
+    paddingTop: 36,
+    paddingBottom: 120,
+    backgroundColor: '#F6F7FB',
+  },
+  centro: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F6F7FB',
+  },
+  titulo: {
+    fontSize: 30,
+    lineHeight: 38,
+    fontWeight: '800',
+    textAlign: 'left',
+    color: '#17182B',
+    marginBottom: 28,
+    letterSpacing: -0.6,
+  },
+  rotulo: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#34334B',
+    marginBottom: 8,
+    marginLeft: 2,
+  },
+  input: {
+    minHeight: 52,
+    borderWidth: 1,
+    borderColor: '#E0E2ED',
+    backgroundColor: '#FFFFFF',
+    color: '#202239',
+    borderRadius: 13,
+    paddingHorizontal: 15,
+    paddingVertical: 13,
+    marginBottom: 18,
+    fontSize: 15,
+  },
+  bloqueado: {
+    backgroundColor: '#F0F1F6',
+    color: '#73788B',
+    borderColor: '#E5E6EE',
+  },
+  botao: {
+    backgroundColor: '#6D28D9',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 52,
+    paddingHorizontal: 18,
+    paddingVertical: 15,
+    borderRadius: 14,
+    marginTop: 8,
+    shadowColor: '#6D28D9',
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+  },
+  botaoSecundario: {
+    backgroundColor: '#3B82F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 52,
+    paddingHorizontal: 18,
+    paddingVertical: 15,
+    borderRadius: 14,
+    marginTop: 14,
+  },
+  textoBotao: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 15,
+  },
+  alternar: {
+    alignItems: 'center',
+    marginTop: 22,
+    paddingVertical: 10,
+  },
+  alternarTexto: {
+    color: '#6D28D9',
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  sair: {
+    alignItems: 'center',
+    marginTop: 25,
+    paddingVertical: 10,
+  },
+  textoSair: {
+    color: '#C2414B',
+    fontWeight: '700',
+    fontSize: 14,
+  },
 });
