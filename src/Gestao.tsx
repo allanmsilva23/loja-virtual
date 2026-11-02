@@ -1,5 +1,5 @@
 import { useCallback, useState, useEffect } from 'react';
-import { Loader2, RefreshCw, Edit, ShieldAlert, Package, ShoppingBag } from 'lucide-react';
+import { Loader2, RefreshCw, Edit, ShieldAlert, Package, ShoppingBag, Upload } from 'lucide-react';
 import { useAuth } from './AuthContext';
 import { supabase } from './supabase';
 import { type Pedido, type Produto, dataBrasil, dinheiro } from './tipos';
@@ -29,6 +29,7 @@ export default function Gestao() {
   const [preco, setPreco] = useState('');
   const [estoque, setEstoque] = useState('0');
   const [imagemUrl, setImagemUrl] = useState('');
+  const [imagemArquivo, setImagemArquivo] = useState<File | null>(null);
   const [ativo, setAtivo] = useState(true);
 
   const carregar = useCallback(async () => {
@@ -92,13 +93,14 @@ export default function Gestao() {
     carregar();
   }, [carregar]);
 
-  const limparFormulario = () => {
+const limparFormulario = () => {
     setProdutoId(null);
     setNome('');
     setDescricao('');
     setPreco('');
     setEstoque('0');
     setImagemUrl('');
+    setImagemArquivo(null);
     setAtivo(true);
   };
 
@@ -109,40 +111,60 @@ export default function Gestao() {
     setPreco(String(produto.preco));
     setEstoque(String(produto.estoque));
     setImagemUrl(produto.imagem_url || '');
+    setImagemArquivo(null);
     setAtivo(produto.ativo);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const salvarProduto = async () => {
+const salvarProduto = async () => {
     const precoNumero = Number(preco.trim().replace(',', '.'));
     const estoqueNumero = Number(estoque.trim());
-    const url = imagemUrl.trim();
 
     if (!nome.trim() || !Number.isFinite(precoNumero) || precoNumero < 0 || !Number.isInteger(estoqueNumero) || estoqueNumero < 0) {
       avisar('Dados inválidos', 'Informe nome, preço válido e estoque inteiro não negativo.');
       return;
     }
 
-    if (url && !/^https:\/\//i.test(url)) {
-      avisar('Imagem inválida', 'Informe uma URL HTTPS pública da imagem.');
-      return;
-    }
-
-    const dados = {
-      nome: nome.trim(),
-      descricao: descricao.trim() || null,
-      preco: precoNumero,
-      quantidade_estoque: estoqueNumero,
-      imagem_url: url || null,
-      ativo,
-    };
-
     setSalvando(true);
     try {
+      let urlFinal = imagemUrl.trim() || null;
+
+      // Se um arquivo da galeria foi selecionado, envia para o Supabase Storage
+      if (imagemArquivo) {
+        const extensao = imagemArquivo.name.split('.').pop();
+        const nomeArquivo = `${Date.now()}-${Math.random().toString(36).substring(2)}.${extensao}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('produtos')
+          .upload(nomeArquivo, imagemArquivo, {
+            cacheControl: '3600',
+            upsert: false,
+          });
+
+        if (uploadError) throw uploadError;
+
+        const { data: publicUrlData } = supabase.storage
+          .from('produtos')
+          .getPublicUrl(nomeArquivo);
+
+        urlFinal = publicUrlData.publicUrl;
+      }
+
+      const dados = {
+        nome: nome.trim(),
+        descricao: descricao.trim() || null,
+        preco: precoNumero,
+        quantidade_estoque: estoqueNumero,
+        imagem_url: urlFinal,
+        ativo,
+      };
+
       const resposta = produtoId
         ? await supabase.from('produtos').update(dados).eq('id', produtoId)
         : await supabase.from('produtos').insert(dados);
+
       if (resposta.error) throw resposta.error;
+
       limparFormulario();
       avisar('Produto', 'Produto salvo com sucesso.');
       await carregar();
@@ -281,7 +303,66 @@ export default function Gestao() {
                   <input type="number" placeholder="Estoque" value={estoque} onChange={(e) => setEstoque(e.target.value)} style={inputStyle} />
                 </div>
                 
-                <input type="url" placeholder="URL da imagem (https://...)" value={imagemUrl} onChange={(e) => setImagemUrl(e.target.value)} style={inputStyle} />
+                <div style={{ marginBottom: '16px' }}>
+                  <label
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      padding: '20px',
+                      backgroundColor: '#F9FAFB',
+                      border: '2px dashed #D1D5DB',
+                      borderRadius: '12px',
+                      cursor: 'pointer',
+                      color: '#4B5563',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      textAlign: 'center',
+                    }}
+                  >
+                    <Upload size={24} color="#6D28D9" />
+                    <span>
+                      {imagemArquivo
+                        ? `Selecionado: ${imagemArquivo.name}`
+                        : 'Clique para escolher uma imagem da galeria'}
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          setImagemArquivo(e.target.files[0]);
+                        }
+                      }}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
+
+                  {(imagemArquivo || imagemUrl) && (
+                    <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: '#F3F4F6', padding: '10px', borderRadius: '10px' }}>
+                      <img
+                        src={imagemArquivo ? URL.createObjectURL(imagemArquivo) : imagemUrl}
+                        alt="Pré-visualização"
+                        style={{ width: '56px', height: '56px', objectFit: 'contain', borderRadius: '8px', backgroundColor: '#FFF' }}
+                      />
+                      <div style={{ flex: 1, fontSize: '12px', color: '#4B5563', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {imagemArquivo ? imagemArquivo.name : 'Imagem atual cadastrada'}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setImagemArquivo(null);
+                          setImagemUrl('');
+                        }}
+                        style={{ backgroundColor: '#FEE2E2', color: '#DC2626', border: 'none', borderRadius: '8px', padding: '6px 10px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
+                      >
+                        Remover
+                      </button>
+                    </div>
+                  )}
+                </div>
                 
                 <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', marginBottom: '24px' }}>
                   <input type="checkbox" checked={ativo} onChange={(e) => setAtivo(e.target.checked)} style={{ width: '20px', height: '20px', accentColor: '#6D28D9' }} />

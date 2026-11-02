@@ -1,4 +1,4 @@
-import { Mail, MapPin, Phone, Instagram, Facebook, Twitter, ShieldCheck } from 'lucide-react';
+import { Mail, MapPin, Phone, ShieldCheck } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -11,9 +11,6 @@ export default function Footer() {
             A sua loja especializada em mochilas, estojos e garrafas térmicas. Aliamos design moderno, durabilidade e tecnologia para o seu dia a dia.
           </p>
           <div style={{ display: 'flex', gap: '16px' }}>
-            <Instagram size={20} style={{ cursor: 'pointer', color: '#E5E7EB' }} />
-            <Facebook size={20} style={{ cursor: 'pointer', color: '#E5E7EB' }} />
-            <Twitter size={20} style={{ cursor: 'pointer', color: '#E5E7EB' }} />
           </div>
         </div>
 
