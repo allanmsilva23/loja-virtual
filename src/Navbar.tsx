@@ -63,7 +63,7 @@ export default function Navbar() {
             >
               <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                 <Icone size={20} color={ativo ? '#6D28D9' : '#83899D'} strokeWidth={ativo ? 2.5 : 2} />
-                {rota.badge > 0 && (
+                {(rota.badge ?? 0) > 0 && (
                   <span 
                     style={{
                       position: 'absolute',
